@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package api.worker.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "wz-car-worker/api/worker/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.worker.v1";
+
+service DeviceState {
+    // 设备重启
+    rpc Restart (DeviceRestartRequest) returns (DeviceRestartReply) {
+        option (google.api.http) = {
+            post: "/v1/device/state/restart"
+            body: "*"
+        };
+    };
+
+    // 同步时间
+    rpc SyncTime (SyncTimeRequest) returns (SyncTimeReply) {
+        option (google.api.http) = {
+            post: "/v1/device/state/sync_time"
+            body: "*"
+        };
+    }
+
+    // 刷新设备状态
+    rpc Refresh (DeviceStateRefreshRequest) returns (DeviceStateRefreshReply) {
+        option (google.api.http) = {
+            post: "/v1/device/state/refresh"
+            body: "*"
+        };
+    }
+
+    // 获取设备状态
+    rpc Get (DeviceStateGetRequest) returns (DeviceStateGetReply) {
+        option (google.api.http) = {
+            get: "/v1/device/state/port"
+            body: "*"
+        };
+    }
+}
+
+message DeviceRestartRequest {
+    repeated string device_nums = 1;
+}
+message DeviceRestartReply {
+    int32 code = 1;
+    string message = 2;
+    map<string, string> data = 3;
+}
+
+message SyncTimeRequest {
+    repeated string device_nums = 1;
+    optional int64 time = 2; // 时间戳 默认为当前时间
+}
+message SyncTimeReply {
+    int32 code = 1;
+    string message = 2;
+    map<string, string> data = 3;
+}
+
+message DeviceStateRefreshRequest {
+    string device_num = 1;
+    uint32 port_num = 2;
+}
+message DeviceStateRefreshReply {
+    int32 code = 1;
+    string message = 2;
+    map<string, string> data = 3;
+}
+
+message DeviceStateGetRequest {
+    string device_num = 1;
+    uint32 port_num = 2;
+}
+message DeviceStateGetReply {
+    int32 code = 1;
+    string message = 2;
+    DeviceState data = 3;
+    message DeviceState {
+        uint32 state = 2; // 状态 0离线 1故障 2空闲
+        string updated_at = 17; // 更新时间
+    }
+}
